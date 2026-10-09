@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vestige LMS - Combined Maths Evaluation</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      .square-accent,
+      .dot-accent {
+        transition: transform 600ms ease;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .square-accent,
+        .dot-accent {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="page-login" data-page="login">
+    <div class="lms-container">
+      
+      <!-- HERO & LOGIN SECTION -->
+      <section class="hero-split">
+        <!-- Left Panel: Brand & Accents -->
+        <div class="brand-panel">
+          <div class="wolf-bg-overlay"></div>
+          <div class="brand-logo-container">
+            <div class="accent-top">
+              <span class="square-accent"></span>
+              <span class="line-accent"></span>
+            </div>
+            <h1 class="brand-title">Vestige</h1>
+            
+            <div class="accent-bottom">
+              <span class="line-accent"></span>
+              <span class="dot-accent"></span>
+            </div>
+          </div>
+          
+        </div>
+
+
+        <!-- Right Panel: Login Box -->
+        <div class="login-panel">
+          <div class="top-bar"></div>
+
+          <div class="login-box">
+            <div class="book-icon-wrapper">
+              <img src="./assets/book-icon.png" alt="Book Icon" class="book-icon" onerror="this.style.display='none'" />
+            </div>
+
+            <h2 class="welcome-heading">WELCOME BACK</h2>
+            <h3 class="welcome-subheading">Start your progress tracking journey</h3>
+
+            <!-- Searchable Student Selection -->
+            <div class="form-group">
+              <label for="studentSearchInput">Search or Select Your Name</label>
+              <div class="select-wrapper">
+                <select id="studentSearchInput" class="custom-input" aria-label="Select student name">
+                  <option value="">Select student name...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="passwordInput">Password</label>
+              <input type="password" id="passwordInput" class="custom-input" placeholder="Enter your password" />
+              <small class="demo-password-note">Demo password - demopass</small>
+            </div>
+
+            <div class="action-group">
+              <button id="viewStudentBtn" class="guest-btn" type="button">SIGN IN AS A GUEST</button>
+              <button id="adminBtn" class="admin-float-link" type="button">Admin Portal</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="adminPinModal" class="admin-pin-modal hidden" aria-hidden="true">
+        <div class="admin-pin-card">
+          <h3>Admin Access</h3>
+          <p>Enter the admin PIN to continue.</p>
+          <label for="adminPinInput" class="sr-only">Admin PIN</label>
+          <input id="adminPinInput" type="password" class="custom-input" placeholder="Enter admin PIN" />
+          <div class="admin-pin-actions">
+            <button id="cancelAdminPin" class="cancel-pin-btn" type="button">Cancel</button>
+            <button id="confirmAdminPin" class="btn-primary" type="button">Enter</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPLORE / PARCHMENT SCROLL SECTION -->
+      <section class="explore-section">
+        <div class="scroll-wrapper">
+          <div class="scroll-cap top-cap"></div>
+          <div class="scroll-body">
+            <h2 class="scroll-title">What you can explore</h2>
+            <ul class="scroll-list">
+              <li>Review weekly paper results and mark sheets.</li>
+                    <li>See special achievements
+and progress.</li>
+              <li> Discover your weak points & Identify areas for improvement.</li>
+              <li>
+                Track your performance with separate graphs for
+                <strong>Pure Mathematics</strong> and
+                <strong>Applied Mathematics</strong>, alongside your
+                <strong>Combined Mathematics total score out of 100</strong>.
+              </li>
+     
+            </ul>
+          </div>
+          <div class="scroll-cap bottom-cap"></div>
+        </div>
+      </section>
+
+      <!-- PLATFORM INFO SECTION -->
+      <section class="info-section">
+        <div class="about-card">
+          <h3>Vestige LMS</h3>
+          <p>
+            A modern learning management platform designed to help students, educators, and institutions manage learning, track academic performance, and make better data-driven decisions.
+          </p>
+        </div>
+
+        <div class="developer-banner">
+          <span class="dev-tag">DEVELOPED BY</span>
+          <span class="dev-name">VIHELA PANAWALA</span>
+          <span class="dev-org"><a href="https://github.com/vihela-s-panawala" target="_blank" rel="noopener noreferrer">nerdy-vvolf on GitHub</a></span>
+        </div>
+
+        <div class="contact-card">
+          <p><strong>Instagram:</strong> <a href="https://www.instagram.com/v1h3l4/" target="_blank" rel="noopener noreferrer">@v1h3l4</a></p>
+          <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/vihela-panawala/" target="_blank" rel="noopener noreferrer">Vihela Panawala</a></p>
+          <p><strong>GitHub:</strong> <a href="https://github.com/vihela-s-panawala" target="_blank" rel="noopener noreferrer">vihela-s-panawala</a></p>
+          <p><strong>Email:</strong> <a href="mailto:panawala.vs@gmail.com">panawala.vs@gmail.com</a></p>
+          <p><strong>Location:</strong> Colombo, Western, Sri Lanka</p>
+        </div>
+      </section>
+
+      <!-- SITE FOOTER -->
+      <footer class="site-footer">
+        <p>© 2026 Vihela Panawala. All rights reserved.</p>
+        
+      </footer>
+
+    </div>
+
+    <script>
+      const brandPanel = document.querySelector(".brand-panel");
+      const brandLogo = brandPanel.querySelector(".brand-logo-container");
+      const squareAccent = brandLogo.querySelector(".square-accent");
+      const dotAccent = brandLogo.querySelector(".dot-accent");
+      let accentsSwapped = false;
+
+      const resetAccents = () => {
+        accentsSwapped = false;
+        squareAccent.style.transform = "";
+        dotAccent.style.transform = "";
+      };
+
+      brandPanel.addEventListener("pointermove", (event) => {
+        const logoPosition = brandLogo.getBoundingClientRect();
+        const pointerOverLogo =
+          event.clientX >= logoPosition.left &&
+          event.clientX <= logoPosition.right &&
+          event.clientY >= logoPosition.top &&
+          event.clientY <= logoPosition.bottom;
+
+        if (pointerOverLogo === accentsSwapped) return;
+        accentsSwapped = pointerOverLogo;
+
+        if (!pointerOverLogo) {
+          resetAccents();
+          return;
+        }
+
+        const squarePosition = squareAccent.getBoundingClientRect();
+        const dotPosition = dotAccent.getBoundingClientRect();
+        squareAccent.style.transform = `translate(${dotPosition.left - squarePosition.left}px, ${dotPosition.top - squarePosition.top}px)`;
+        dotAccent.style.transform = `translate(${squarePosition.left - dotPosition.left}px, ${squarePosition.top - dotPosition.top}px)`;
+      });
+
+      brandPanel.addEventListener("pointerleave", resetAccents);
+    </script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
