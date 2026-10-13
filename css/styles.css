@@ -717,9 +717,28 @@ body.light-mode .site-footer {
   overflow-wrap: anywhere;
 }
 
+.feedback-analytics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.feedback-analytics-card {
+  padding: 16px;
+  border: 1px solid var(--border-burgundy);
+  border-radius: 8px;
+  background: rgba(122, 12, 12, 0.14);
+  font-weight: 700;
+}
+
 body.light-mode .feedback-section {
   background-color: var(--off-white);
   color: var(--black);
+}
+
+body.light-mode .feedback-analytics-card {
+  background: var(--burgundy-light);
 }
 
 body.light-mode .feedback-card {

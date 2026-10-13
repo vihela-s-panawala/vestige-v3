@@ -1,15 +1,26 @@
-const FEEDBACK_STORAGE_KEY = 'vestige-feedback-reviews';
+const FEEDBACK_ENDPOINT = '/api/feedback';
 
-function readReviews() {
-  const savedReviews = localStorage.getItem(FEEDBACK_STORAGE_KEY);
-  if (savedReviews === null) return [];
+function createReview(review) {
+  const article = document.createElement('article');
+  article.className = 'feedback-review';
 
-  const reviews = JSON.parse(savedReviews);
-  if (!Array.isArray(reviews)) {
-    throw new Error('Saved feedback has an invalid format.');
-  }
+  const heading = document.createElement('div');
+  heading.className = 'feedback-review-heading';
 
-  return reviews;
+  const name = document.createElement('strong');
+  name.textContent = review.name;
+
+  const stars = document.createElement('span');
+  stars.className = 'feedback-review-stars';
+  stars.setAttribute('aria-label', `${review.rating} out of 5 stars`);
+  stars.textContent = `${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}`;
+
+  const text = document.createElement('p');
+  text.textContent = review.review;
+
+  heading.append(name, stars);
+  article.append(heading, text);
+  return article;
 }
 
 function renderReviews(container, reviews) {
@@ -25,30 +36,7 @@ function renderReviews(container, reviews) {
 
   const heading = document.createElement('h3');
   heading.textContent = 'Recent reviews';
-  container.append(heading);
-
-  reviews.slice().reverse().forEach((review) => {
-    const article = document.createElement('article');
-    article.className = 'feedback-review';
-
-    const reviewHeading = document.createElement('div');
-    reviewHeading.className = 'feedback-review-heading';
-
-    const name = document.createElement('strong');
-    name.textContent = review.name;
-
-    const stars = document.createElement('span');
-    stars.className = 'feedback-review-stars';
-    stars.setAttribute('aria-label', `${review.rating} out of 5 stars`);
-    stars.textContent = `${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}`;
-
-    const text = document.createElement('p');
-    text.textContent = review.review;
-
-    reviewHeading.append(name, stars);
-    article.append(reviewHeading, text);
-    container.append(article);
-  });
+  container.append(heading, ...reviews.map(createReview));
 }
 
 export function bindFeedbackForm(defaultName = '') {
@@ -71,14 +59,25 @@ export function bindFeedbackForm(defaultName = '') {
     });
   });
 
-  try {
-    renderReviews(reviewsContainer, readReviews());
-  } catch (error) {
-    console.error('Unable to load feedback:', error);
-    status.textContent = 'Saved reviews could not be loaded. Please refresh or try again later.';
+  async function loadReviews() {
+    const response = await fetch(FEEDBACK_ENDPOINT);
+    if (!response.ok) {
+      throw new Error(`Feedback request failed with status ${response.status}.`);
+    }
+
+    const reviews = await response.json();
+    if (!Array.isArray(reviews)) {
+      throw new Error('The feedback service returned invalid data.');
+    }
+    renderReviews(reviewsContainer, reviews);
   }
 
-  form.addEventListener('submit', (event) => {
+  loadReviews().catch((error) => {
+    console.error('Unable to load feedback:', error);
+    status.textContent = 'Reviews could not be loaded. Please try again later.';
+  });
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const formData = new FormData(form);
@@ -91,20 +90,40 @@ export function bindFeedbackForm(defaultName = '') {
       return;
     }
 
+    const submitButton = form.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    status.textContent = 'Submitting your feedback...';
+
     try {
-      const reviews = readReviews();
-      reviews.push({ name, rating, review });
-      localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(reviews));
-      renderReviews(reviewsContainer, reviews);
+      const response = await fetch(FEEDBACK_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, rating, review })
+      });
+      const savedReview = await response.json();
+
+      if (!response.ok) {
+        throw new Error(savedReview.message || `Feedback request failed with status ${response.status}.`);
+      }
+
       form.reset();
       if (defaultName && nameInput instanceof HTMLInputElement) {
         nameInput.value = defaultName;
       }
       delete starsContainer.dataset.rating;
-      status.textContent = 'Thank you! Your feedback has been saved.';
+      try {
+        await loadReviews();
+        status.textContent = 'Thank you! Your feedback has been shared.';
+      } catch (error) {
+        console.error('Feedback was saved, but the review list could not be refreshed:', error);
+        reviewsContainer.prepend(createReview(savedReview));
+        status.textContent = 'Your feedback was saved, but the review list could not be refreshed.';
+      }
     } catch (error) {
-      console.error('Unable to save feedback:', error);
-      status.textContent = 'Your feedback could not be saved. Please try again.';
+      console.error('Unable to submit feedback:', error);
+      status.textContent = 'Your feedback could not be submitted. Please try again later.';
+    } finally {
+      submitButton.disabled = false;
     }
   });
 }

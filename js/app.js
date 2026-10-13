@@ -49,7 +49,6 @@ function bindAdminPortalAccess() {
         return;
       }
 
-      localStorage.setItem('vestige-admin-auth', 'true');
       closeAdminModal();
       window.location.href = './admin.html';
     } catch (error) {

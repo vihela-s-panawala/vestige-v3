@@ -250,8 +250,28 @@ The public preview is intentionally limited and does **not** represent the compl
 | JavaScript | Frontend development |
 | HTML / CSS | Interface structure and styling |
 | Vercel | Prototype deployment |
+| Supabase | Shared database for student feedback |
 | Git | Version control |
 | GitHub | Source code and project management |
+
+---
+
+## Shared feedback setup (Vercel + Supabase)
+
+Student feedback is stored centrally in Supabase so reviews appear on every device. The service-role key is used only by the Vercel API and must never be added to browser code or committed to Git.
+
+1. Create a Supabase project.
+2. In the Supabase SQL Editor, run [`supabase/feedback.sql`](./supabase/feedback.sql).
+3. In the Vercel project settings, add these environment variables for the deployment environments you use:
+   - `SUPABASE_URL`: the project URL from Supabase.
+   - `SUPABASE_SERVICE_ROLE_KEY`: the server-side service-role secret from Supabase API settings.
+   - `ADMIN_PIN`: the admin PIN used by the admin sign-in.
+   - `ADMIN_SESSION_SECRET`: a separate, randomly generated secret used to sign short-lived admin sessions.
+4. Redeploy the Vercel project so its API functions can read the new environment variables.
+
+The feedback endpoints read and create public reviews; deleting reviews requires the short-lived admin session established by the server-side PIN check. The Admin Portal's **Manage Feedback** tab shows review totals, average rating, rating distribution, and lets the admin permanently delete an individual review. Keep Row Level Security enabled and do not expose the service-role key or session secret in frontend settings, source code, or messages.
+
+Feedback submitted before the shared database is configured remains only in the browser where it was entered; this setup does not automatically import browser-local reviews.
 
 ---
 
@@ -269,7 +289,7 @@ The following components are part of the planned development roadmap:
 | Analytics Engine | Question and topic-level insights |
 | Expanded Subject Support | Support for different subjects |
 | Expanded Paper Structure Support | Support for different Paper Structures such as MCQs/Essays/Structured Essays, etc. |
-| Feedback System | Student / teacher feedback |
+| Feedback System | Shared student feedback, ratings, and admin moderation |
 
 ---
 
@@ -371,6 +391,7 @@ The current tuition-class deployment provides an opportunity to continuously ide
 - [x] Sample-data demonstration
 - [x] Real-world testing
 - [x] Prototype currently used with ~50 students
+- [x] Shared student feedback with admin analytics and moderation
 
 ---
 
@@ -389,7 +410,6 @@ The current tuition-class deployment provides an opportunity to continuously ide
 - [ ] Question-level analytics
 - [ ] Unit-level analytics
 - [ ] Multi-subject support
-- [ ] Student feedback system
 - [ ] Image-reading AI pipeline
 - [ ] Automated answer-sheet analysis
 - [ ] Expanded assessment formats
@@ -518,5 +538,3 @@ Copyright 2026 Vihela Panawala
 ---
 
 # 📸 Screenshots
-
-
