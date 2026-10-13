@@ -162,7 +162,7 @@
       <!-- HEADER -->
       <header class="admin-header">
         <div class="admin-title-group">
-          <a href="./index.html" class="back-btn">← Exit Admin</a>
+          <a href="./index.html" id="adminExit" class="back-btn">← Exit Admin</a>
           <h1 class="brand-title" style="font-size: 1.8rem;">Vestige LMS - Admin Portal</h1>
         </div>
 
@@ -175,6 +175,7 @@
       <div class="admin-tabs">
         <button class="tab-btn active" data-target="marksPanel">Manage Marks</button>
         <button class="tab-btn" data-target="studentsPanel">Manage Roster</button>
+        <button class="tab-btn" data-target="feedbackPanel">Manage Feedback</button>
         <button class="tab-btn" data-target="settingsPanel">Security Settings</button>
       </div>
 
@@ -246,6 +247,27 @@
         </div>
       </section>
 
+      <section id="feedbackPanel" class="panel-card admin-section" style="display: none;">
+        <h2 class="panel-title">Feedback &amp; Reviews</h2>
+        <p id="feedbackAdminStatus" role="status" aria-live="polite">Loading feedback...</p>
+        <div id="feedbackAnalytics" class="feedback-analytics" aria-live="polite"></div>
+        <h3 style="margin-top: 28px; margin-bottom: 15px; font-size: 1.1rem; color: var(--burgundy-bright);">Submitted reviews</h3>
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Rating</th>
+                <th>Review</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="feedbackTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- PANEL 3: SECURITY SETTINGS -->
       <section id="settingsPanel" class="panel-card admin-section" style="display: none;">
         <h2 class="panel-title">Update Admin PIN</h2>
@@ -275,6 +297,27 @@
 
       const STORAGE_KEY = 'combined-maths-state';
 
+      const adminSessionResponse = await fetch('/api/admin-check');
+      if (adminSessionResponse.status === 401) {
+        localStorage.removeItem('vestige-admin-auth');
+        window.location.href = './index.html';
+      } else if (!adminSessionResponse.ok) {
+        throw new Error('Unable to verify the admin session. Please reload and try again.');
+      }
+
+      document.getElementById('adminExit').addEventListener('click', async (event) => {
+        event.preventDefault();
+        try {
+          const response = await fetch('/api/admin-check', { method: 'DELETE' });
+          if (!response.ok) throw new Error(`Logout failed with status ${response.status}.`);
+          localStorage.removeItem('vestige-admin-auth');
+          window.location.href = './index.html';
+        } catch (error) {
+          console.error('Unable to end the admin session:', error);
+          alert('Unable to end the admin session. Please try again.');
+        }
+      });
+
       // Theme toggle support
       function applyTheme(theme) {
         const isLight = theme === 'light';
@@ -293,10 +336,6 @@
         applyTheme(nextTheme);
         localStorage.setItem('combined-maths-theme', nextTheme);
       });
-
-      if (localStorage.getItem('vestige-admin-auth') !== 'true') {
-        window.location.href = './index.html';
-      }
 
       // Default Admin State
       let state = {
@@ -343,8 +382,99 @@
           btn.classList.add('active');
           const targetId = btn.getAttribute('data-target');
           document.getElementById(targetId).style.display = 'block';
+          if (targetId === 'feedbackPanel') loadFeedbackAdmin();
         });
       });
+
+      const feedbackStatus = document.getElementById('feedbackAdminStatus');
+      const feedbackAnalytics = document.getElementById('feedbackAnalytics');
+      const feedbackTableBody = document.getElementById('feedbackTableBody');
+
+      async function loadFeedbackAdmin() {
+        feedbackStatus.textContent = 'Loading feedback...';
+        try {
+          const response = await fetch('/api/feedback');
+          if (!response.ok) throw new Error(`Feedback request failed with status ${response.status}.`);
+          const reviews = await response.json();
+          if (!Array.isArray(reviews)) throw new Error('The feedback service returned invalid data.');
+          renderFeedbackAdmin(reviews);
+          feedbackStatus.textContent = reviews.length ? `${reviews.length} review${reviews.length === 1 ? '' : 's'} loaded.` : 'No feedback has been submitted yet.';
+        } catch (error) {
+          console.error('Unable to load admin feedback:', error);
+          feedbackStatus.textContent = 'Feedback could not be loaded. Please try again later.';
+        }
+      }
+
+      function renderFeedbackAdmin(reviews) {
+        const average = reviews.length
+          ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+          : '—';
+        const distribution = [5, 4, 3, 2, 1].map((rating) => ({
+          rating,
+          count: reviews.filter((review) => review.rating === rating).length
+        }));
+
+        feedbackAnalytics.replaceChildren();
+        const totalCard = document.createElement('div');
+        totalCard.className = 'feedback-analytics-card';
+        totalCard.textContent = `Total reviews: ${reviews.length}`;
+        const averageCard = document.createElement('div');
+        averageCard.className = 'feedback-analytics-card';
+        averageCard.textContent = `Average rating: ${average} / 5`;
+        feedbackAnalytics.append(totalCard, averageCard);
+        distribution.forEach(({ rating, count }) => {
+          const card = document.createElement('div');
+          card.className = 'feedback-analytics-card';
+          card.textContent = `${rating} star${rating === 1 ? '' : 's'}: ${count}`;
+          feedbackAnalytics.append(card);
+        });
+
+        feedbackTableBody.replaceChildren();
+        if (!reviews.length) {
+          const row = document.createElement('tr');
+          const cell = document.createElement('td');
+          cell.colSpan = 5;
+          cell.textContent = 'No reviews to display.';
+          row.append(cell);
+          feedbackTableBody.append(row);
+          return;
+        }
+
+        reviews.forEach((review) => {
+          const row = document.createElement('tr');
+          const dateCell = document.createElement('td');
+          const createdDate = new Date(review.created_at);
+          dateCell.textContent = Number.isNaN(createdDate.getTime()) ? 'Unknown date' : createdDate.toLocaleString();
+          const nameCell = document.createElement('td');
+          nameCell.textContent = review.name;
+          const ratingCell = document.createElement('td');
+          ratingCell.textContent = `${review.rating} / 5`;
+          const reviewCell = document.createElement('td');
+          reviewCell.textContent = review.review;
+          const actionCell = document.createElement('td');
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'btn-danger';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', async () => {
+            if (!confirm(`Permanently delete the review by ${review.name}?`)) return;
+            deleteButton.disabled = true;
+            try {
+              const response = await fetch(`/api/feedback?id=${encodeURIComponent(review.id)}`, { method: 'DELETE' });
+              const result = await response.json();
+              if (!response.ok) throw new Error(result.message || `Delete failed with status ${response.status}.`);
+              await loadFeedbackAdmin();
+            } catch (error) {
+              console.error('Unable to delete feedback:', error);
+              feedbackStatus.textContent = 'The review could not be deleted. Please try again.';
+              deleteButton.disabled = false;
+            }
+          });
+          actionCell.append(deleteButton);
+          row.append(dateCell, nameCell, ratingCell, reviewCell, actionCell);
+          feedbackTableBody.append(row);
+        });
+      }
 
       // Populate student select dropdowns
       function renderStudentDropdown() {

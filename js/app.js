@@ -1,4 +1,5 @@
 import { initialStudents } from './data.js';
+import { bindFeedbackForm } from './feedback.js';
 
 function bindAdminPortalAccess() {
   const adminButton = document.getElementById('adminBtn');
@@ -48,7 +49,6 @@ function bindAdminPortalAccess() {
         return;
       }
 
-      localStorage.setItem('vestige-admin-auth', 'true');
       closeAdminModal();
       window.location.href = './admin.html';
     } catch (error) {
@@ -121,6 +121,7 @@ function bindGuestLogin() {
 populateStudentDatalist();
 bindGuestLogin();
 bindAdminPortalAccess();
+bindFeedbackForm();
 
 // Render Week/Paper Marksheet section with class average, total students, highest mark & rank highlights
 function renderPaperSection(studentName) {
