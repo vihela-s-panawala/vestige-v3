@@ -540,6 +540,42 @@
         </div>
       </section>
 
+      <section class="feedback-section" aria-labelledby="feedbackTitle">
+        <div class="feedback-card">
+          <h2 id="feedbackTitle">Share Your Feedback</h2>
+          <p class="feedback-intro">Rate your experience and leave a brief review. Reviews are saved in this browser.</p>
+          <form class="feedback-form" data-feedback-form>
+            <div class="feedback-form-group">
+              <label for="feedbackName">Your name</label>
+              <input id="feedbackName" name="name" type="text" maxlength="60" autocomplete="name" required />
+            </div>
+            <fieldset class="feedback-rating">
+              <legend>Your rating</legend>
+              <div class="feedback-stars">
+                <input id="feedbackRating1" name="rating" type="radio" value="1" required />
+                <label for="feedbackRating1" aria-label="1 star">★</label>
+                <input id="feedbackRating2" name="rating" type="radio" value="2" />
+                <label for="feedbackRating2" aria-label="2 stars">★</label>
+                <input id="feedbackRating3" name="rating" type="radio" value="3" />
+                <label for="feedbackRating3" aria-label="3 stars">★</label>
+                <input id="feedbackRating4" name="rating" type="radio" value="4" />
+                <label for="feedbackRating4" aria-label="4 stars">★</label>
+                <input id="feedbackRating5" name="rating" type="radio" value="5" />
+                <label for="feedbackRating5" aria-label="5 stars">★</label>
+              </div>
+            </fieldset>
+            <div class="feedback-form-group">
+              <label for="feedbackReview">Brief review</label>
+              <textarea id="feedbackReview" name="review" rows="3" maxlength="300" required></textarea>
+              <small>Up to 300 characters.</small>
+            </div>
+            <button class="feedback-submit" type="submit">Submit feedback</button>
+            <p class="feedback-status" data-feedback-status role="status" aria-live="polite"></p>
+          </form>
+          <div class="feedback-reviews" data-feedback-reviews aria-live="polite"></div>
+        </div>
+      </section>
+
       <!-- FOOTER -->
       <footer class="site-footer" style="margin-top: 40px; border-radius: 8px;">
         <p>© 2026 Vihela Panawala. All rights reserved.</p>
@@ -550,6 +586,7 @@
     <!-- DASHBOARD LOGIC SCRIPT -->
     <script type="module">
       import { sampleMarks, initialStudents } from './js/data.js';
+      import { bindFeedbackForm } from './js/feedback.js';
 
       const STORAGE_KEY = 'combined-maths-state';
       let currentGraphMode = 'all';
@@ -603,6 +640,7 @@
       }
 
       const studentName = state.selectedStudent;
+      bindFeedbackForm(studentName);
       document.getElementById('studentNameDisplay').textContent = studentName;
       const headerGreeting = document.getElementById('headerGreeting');
       if (headerGreeting) {

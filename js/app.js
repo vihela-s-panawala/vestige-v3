@@ -1,4 +1,5 @@
 import { initialStudents } from './data.js';
+import { bindFeedbackForm } from './feedback.js';
 
 function bindAdminPortalAccess() {
   const adminButton = document.getElementById('adminBtn');
@@ -121,6 +122,7 @@ function bindGuestLogin() {
 populateStudentDatalist();
 bindGuestLogin();
 bindAdminPortalAccess();
+bindFeedbackForm();
 
 // Render Week/Paper Marksheet section with class average, total students, highest mark & rank highlights
 function renderPaperSection(studentName) {
